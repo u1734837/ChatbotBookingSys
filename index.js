@@ -27,7 +27,8 @@ app.post('/', express.json(),(req, res) => {
                 "title": "Times available",
                 "text": [
                   "This is text line 1.",
-                  "This is text line 2."
+                  "This is text line 2.",
+                  "This is text line 3."
                 ]
               }
             ]
