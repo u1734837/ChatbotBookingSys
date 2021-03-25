@@ -14,7 +14,7 @@ app.post('/', express.json(),(req, res) => {
     });
 
     function demo(agent){
-        agent.add("WEBHOOK TEST");
+        agent.add("WEBHOOK TEST CHAT");
     }
 
     function timesAvailable(agent)
