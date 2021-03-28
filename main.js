@@ -30,28 +30,55 @@ function connectToDatabase(){
         resolve(connection);
     })
 }
+
+function insertCustomer(connection, data){
+    return new Promise((resolve, reject) => {
+      connection.query('INSERT INTO users SET ?', data, (error, results, fields) => {
+        resolve(results);
+      });
+    });
+  }
+
 function queryShieldYes(connection){
     return new Promise((resolve, reject) => {
-        connection.query("SELECT * FROM appointment WHERE shielding = 'yes", (error, results, fields) => {
+        connection.query("SELECT * FROM appointment WHERE shielding = 'yes' AND taken < 5", (error, results, fields) => {
             resolve(results);
         });
     });
 }
-function ReadShieldYes(agent){
+function handleReadShieldYes(agent){
     return connectToDatabase()
     .then(connection => {
         return queryShieldYes(connection)
         .then(result => {
             console.log(result);
-            agent.add('First name: ${result[0].name}')
+            agent.add('TEST')
             connection.end(); 
         });
     });
 }
 
+function handleWriteBooking(agent){
+    const data = {
+      name: agent.parameters.given-name,
+      email: agent.parameters.email
+    };
+    return connectToDatabase()
+    .then(connection => {
+      return insertCustomer(connection, data)
+      .then(result => {
+ 		agent.add(`Data inserted`);       
+        connection.end();
+      });
+    });
+  }
+
+
+
 let intentMap = new Map();
 
-intentMap.set('getDataFromMySQL', ReadShieldYes);
+intentMap.set('shieldYesTime', handleReadShieldYes);
+intentMap.set('confirmBooking', handleWriteBooking)
 
 
 
