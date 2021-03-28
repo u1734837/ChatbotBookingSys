@@ -14,7 +14,7 @@ app.post('/', express.json(),(req, res) => {
         request : req,
         response : res
     });
-});
+
 
 
 function connectToDatabase(){
@@ -47,6 +47,7 @@ function queryShieldYes(connection){
     });
 }
 function handleReadShieldYes(agent){
+    console.log("handleShieldYes has started")
     return connectToDatabase()
     .then(connection => {
         return queryShieldYes(connection)
@@ -78,9 +79,10 @@ function handleWriteBooking(agent){
 let intentMap = new Map();
 
 intentMap.set('shieldYesTime', handleReadShieldYes);
-intentMap.set('confirmBooking', handleWriteBooking)
+intentMap.set('confirmBooking', handleWriteBooking);
 
+agent.handleRequest(intentMap);
 
-
+});
 
 app.listen(3333, () => console.log("Server is live at port 3333"));
