@@ -24,7 +24,7 @@ app.post('/', function (request, response) {
         return queryShieldYes(connection)
         .then(result => {
             console.log(result);
-            agent.add('TEST')
+            agent.add('Time: ${result.time}')
             connection.end(); 
         });
     });
@@ -35,7 +35,7 @@ app.post('/', function (request, response) {
   function connectToDatabase(){
     const connection = mysql.createConnection({
         host: '138.68.144.68', 
-        user: 'nathan',
+        user: 'ant',
         password: 'password',
         database: 'nathan_uni' 
     });
@@ -47,7 +47,7 @@ app.post('/', function (request, response) {
   }
   function queryShieldYes(connection){
     return new Promise((resolve, reject) => {
-        connection.query('SELECT * FROM appointment WHERE shielding = "yes" AND taken < 5', (error, results, fields) => {
+        connection.query("SELECT * FROM appointment WHERE shielding = 'yes'", (error, results, fields) => {
             resolve(results);
             console.log("query result:"+results);
         });
