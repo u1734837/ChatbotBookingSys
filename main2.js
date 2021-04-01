@@ -17,27 +17,18 @@ app.post('/', function (request, response) {
   console.log('header: ' + JSON.stringify(request.headers));
   console.log('body: ' + JSON.stringify(request.body));
 
-  function handleReadShieldYes(agent){
-    console.log("handleShieldYes has started")
-    return connectToDatabase()
-    .then(connection => {
-        return queryShieldYes(connection)
-        .then(result => {
-            console.log(result);
-            agent.add('Time: ${result.time}')
-            connection.end(); 
-        });
-    });
-  }
+
 
 
 
   function connectToDatabase(){
     const connection = mysql.createConnection({
-        host: '138.68.144.68', 
-        user: 'ant',
+        host: 'localhost', 
+        port: 3306,
+        debug: true,
+        user: 'nathan1',
         password: 'password',
-        database: 'nathan_uni' 
+        database: 'nathan_uni2' 
     });
 
     return new Promise((resolve, reject) => {
@@ -47,13 +38,28 @@ app.post('/', function (request, response) {
   }
   function queryShieldYes(connection){
     return new Promise((resolve, reject) => {
-        connection.query("SELECT * FROM appointment WHERE shielding = 'yes'", (error, results, fields) => {
-            resolve(results);
+        connection.query("SELECT * FROM appointment WHERE shielding = 'yes' AND taken < 5", (error, results, fields) => {
+          if(error){
+            reject(error)
+          }
+          resolve(results);
             console.log("query result:"+results);
         });
     });
   }
-
+  function handleReadShieldYes(agent){
+    console.log("handleShieldYes has started")
+    return connectToDatabase()
+    .then(connection => {
+        return queryShieldYes(connection)
+        .then(result => {
+            console.log("log: ", result);
+            agent.add(`Time: ${result[0].time}`)
+            connection.end(); 
+        })
+        .catch(error => console.log("error", error))
+    });
+  }
 
 
 
