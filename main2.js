@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const { WebhookClient } = require('dialogflow-fulfillment');
 const mysql = require('mysql');
+const dfff = require('dialogflow-fulfillment');
 
 
 app.get('/', (req, res) => {
@@ -49,15 +50,120 @@ app.post('/', function (request, response) {
   }
   function handleReadShieldYes(agent){
     console.log("handleShieldYes has started")
+
     return connectToDatabase()
     .then(connection => {
         return queryShieldYes(connection)
         .then(result => {
             console.log("log: ", result);
-            agent.add(`Time: ${result[0].time}`)
+            var payloadYesShieldData = {
+              "richContent": [
+                [
+                  {
+                    "type": "info",
+                    "title": "Times available"
+                  },
+                  {
+                    "type": "chips",
+                    "options": [
+                      {
+                        "text": `${result[0].time}`,
+                      },
+                      {
+                        "text": `${result[1].time}`,
+                      }
+                    ]
+                  }
+                ]
+              ]
+            }
+            agent.add(new dfff.Payload(agent.UNSPECIFIED, payloadYesShieldData, {sendAsMessage: true, rawPayload: true}))
             connection.end(); 
         })
         .catch(error => console.log("error", error))
+    });
+  }
+  function queryShieldNo(connection){
+    return new Promise((resolve, reject) => {
+        connection.query("SELECT * FROM appointment WHERE shielding = 'no' AND taken < 15", (error, results, fields) => {
+          if(error){
+            reject(error)
+          }
+          resolve(results);
+            console.log("query result:"+results);
+        });
+    });
+  }
+  function handleReadShieldNo(agent){
+    console.log("handleShieldNo has started")
+      return connectToDatabase()
+      .then(connection => {
+        return queryShieldNo(connection)
+        .then(result => {
+          console.log("log: ", result);
+          var payloadNoShieldData = {
+            "richContent": [
+              [
+                {
+                  "type": "info",
+                  "title": "Times available"
+                },
+                {
+                  "type": "chips",
+                  "options": [
+                    {
+                      "text": `${result[0].time}`,
+                    },
+                    {
+                      "text": `${result[1].time}`,
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+          agent.add(new dfff.Payload(agent.UNSPECIFIED, payloadNoShieldData, {sendAsMessage: true, rawPayload: true}))
+          connection.end(); 
+      })
+      .catch(error => console.log("error", error))
+  });
+}
+
+  function insertBooking(connection, data){
+    return new Promise((resolve, reject) => {
+      connection.query('INSERT INTO customer SET ?', data, (error, results, fields) => {
+        resolve(results);
+      });
+    });
+  }
+  //inserting for shielding booking
+  function handleInsertBooking1(agent){
+    const data = {
+      name: agent.context.get("book_awaiting_name").parameters['given-name'],
+      email: agent.context.get("book_awaiting_email").parameters.email
+    };
+    return connectToDatabase()
+    .then(connection => {
+      return insertBooking(connection, data)
+      .then(result => {
+     agent.add(`Thank you, your booking has been placed, please arrive on time.`);       
+        connection.end();
+      });
+    });
+  }
+  //inserting for non shielding booking
+  function handleInsertBooking2(agent){
+    const data = {
+      name: agent.context.get("book_awaiting_name").parameters['given-name'],
+      email: agent.context.get("book_awaiting_email").parameters.email
+    };
+    return connectToDatabase()
+    .then(connection => {
+      return insertBooking(connection, data)
+      .then(result => {
+     agent.add(`Thank you, your booking has been placed, please arrive on time.`);       
+        connection.end();
+      });
     });
   }
 
@@ -67,7 +173,10 @@ app.post('/', function (request, response) {
   let intentMap = new Map();
 
   intentMap.set('shieldYesTime', handleReadShieldYes);
-  ////intentMap.set('confirmBooking', handleWriteBooking);
+  intentMap.set('shieldNoTime', handleReadShieldNo);
+  intentMap.set('confirmBooking1', handleInsertBooking1);
+  intentMap.set('confirmBooking2', handleInsertBooking2);
+
 
   agent.handleRequest(intentMap);
 });

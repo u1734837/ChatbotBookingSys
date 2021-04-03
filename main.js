@@ -86,3 +86,65 @@ agent.handleRequest(intentMap);
 });
 
 app.listen(3333, () => console.log("Server is live at port 3333"));
+
+
+
+"richContent": [
+  [
+    {
+      "type": "info",
+      "title": "Times available",
+      "subtitle": "These are the available times",
+    },
+    {
+      "type": "chips",
+      "options": [
+        {
+          "text": "Chip 1",
+        },
+        {
+          "text": "Chip 2",
+        }
+      ]
+    }
+  ]
+]
+
+
+
+
+function handleReadShieldNo(agent){
+  console.log("handleShieldYes has started")
+
+  return connectToDatabase()
+  .then(connection => {
+      return queryShieldNo(connection)
+      .then(result => {
+          console.log("log: ", result);
+          var payloadYesShieldData = {
+            "richContent": [
+              [
+                {
+                  "type": "info",
+                  "title": "Times available"
+                },
+                {
+                  "type": "chips",
+                  "options": [
+                    {
+                      "text": `${result[0].time}`,
+                    },
+                    {
+                      "text": `${result[1].time}`,
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+          agent.add(new dfff.Payload(agent.UNSPECIFIED, payloadYesShieldData, {sendAsMessage: true, rawPayload: true}))
+          connection.end(); 
+      })
+      .catch(error => console.log("error", error))
+  });
+}
