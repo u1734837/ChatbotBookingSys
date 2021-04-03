@@ -56,6 +56,24 @@ app.post('/', function (request, response) {
         return queryShieldYes(connection)
         .then(result => {
             console.log("log: ", result);
+            result.forEach(Item => {
+                var payloadYesShieldData = {
+                    "richContent": [
+                      [
+                        {
+                          "type": "info",
+                          "title": "Times available"
+                        },
+                        {
+                          "type": "chips",
+                          "options": [
+                            {
+                              "text": `${result[Item].time}`,
+                            }
+                        ]
+                    }
+                ]]}
+            });
             var payloadYesShieldData = {
               "richContent": [
                 [
@@ -127,5 +145,40 @@ function queryShieldNo(connection){
           resolve(results);
             console.log("query result:"+results);
         });
+    });
+
+
+
+
+
+
+    function updateDatabase(connection,TimeS){
+        return new Promise((resolve, reject) => {
+          connection.query(`SELECT * FROM appointment WHERE time = ${TimeS}`, (error, results, fields) => {
+            resolve(results);
+          });
+        });
+      }
+  }
+
+
+
+
+
+  function handleInsertBooking1(agent){
+    const data = {
+      name: agent.context.get("book_awaiting_name").parameters['given-name'],
+      email: agent.context.get("book_awaiting_email").parameters.email
+    };
+    const timeSelected = agent.context.get("booking_time").parameters.book_time
+    updateDatabase(connection, timeSelected)
+    return connectToDatabase()
+    .then(connection => {
+      
+      return insertBooking(connection, data)
+      .then(result => {
+     agent.add(`Thank you, your booking has been placed, please arrive on time.`);       
+        connection.end();
+      });
     });
   }

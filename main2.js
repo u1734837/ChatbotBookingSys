@@ -1,10 +1,11 @@
+//Requiring all of the necessary packages
 const express = require('express');
 const app = express();
 const { WebhookClient } = require('dialogflow-fulfillment');
 const mysql = require('mysql');
 const dfff = require('dialogflow-fulfillment');
 
-
+//testing server is working
 app.get('/', (req, res) => {
     res.send("We are live")
 });
@@ -18,10 +19,7 @@ app.post('/', function (request, response) {
   console.log('header: ' + JSON.stringify(request.headers));
   console.log('body: ' + JSON.stringify(request.body));
 
-
-
-
-
+//creating a connection to my DB
   function connectToDatabase(){
     const connection = mysql.createConnection({
         host: 'localhost', 
@@ -37,6 +35,7 @@ app.post('/', function (request, response) {
         resolve(connection);
     })
   }
+   //Querying DB for non shield times
   function queryShieldYes(connection){
     return new Promise((resolve, reject) => {
         connection.query("SELECT * FROM appointment WHERE shielding = 'yes' AND taken < 5", (error, results, fields) => {
@@ -48,6 +47,7 @@ app.post('/', function (request, response) {
         });
     });
   }
+    //Pulling data from the shielded DB query and displaying in the chatbot agent
   function handleReadShieldYes(agent){
     console.log("handleShieldYes has started")
 
@@ -83,6 +83,7 @@ app.post('/', function (request, response) {
         .catch(error => console.log("error", error))
     });
   }
+  //Querying DB for non shield times
   function queryShieldNo(connection){
     return new Promise((resolve, reject) => {
         connection.query("SELECT * FROM appointment WHERE shielding = 'no' AND taken < 15", (error, results, fields) => {
@@ -94,6 +95,7 @@ app.post('/', function (request, response) {
         });
     });
   }
+  //Pulling data from the non shield DB query and displaying in the chatbot agent
   function handleReadShieldNo(agent){
     console.log("handleShieldNo has started")
       return connectToDatabase()
@@ -129,6 +131,7 @@ app.post('/', function (request, response) {
   });
 }
 
+//insert into customer data into customer table
   function insertBooking(connection, data){
     return new Promise((resolve, reject) => {
       connection.query('INSERT INTO customer SET ?', data, (error, results, fields) => {
@@ -167,6 +170,14 @@ app.post('/', function (request, response) {
     });
   }
 
+  //Delete appointment from customer table
+  function deleteBooking(connection, email){
+    return new Promise((resolve, reject) => {
+      connection.query(`DELETE from users WHERE email = ?`, email, (error, results, fields) => {
+        resolve(results);
+      });
+    });
+  }
 
 
 
