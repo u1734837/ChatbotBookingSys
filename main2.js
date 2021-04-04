@@ -173,8 +173,20 @@ app.post('/', function (request, response) {
   //Delete appointment from customer table
   function deleteBooking(connection, email){
     return new Promise((resolve, reject) => {
-      connection.query(`DELETE from users WHERE email = ?`, email, (error, results, fields) => {
+      connection.query(`DELETE from customer WHERE email = ?`, email, (error, results, fields) => {
         resolve(results);
+      });
+    });
+  }
+  //delete appointment based on user's input
+  function handleDeleteBooking(agent){
+    const email = agent.context.get("delete_email").parameters.dlt_email;
+    return connectToDatabase()
+    .then(connection => {
+      return deleteBooking(connection, email)
+      .then(result => {
+ 		agent.add(`Thank you, your appointment has now been cancelled. You will need to make another appointment if you wish to attend the event.`);       
+        connection.end();
       });
     });
   }
@@ -187,6 +199,7 @@ app.post('/', function (request, response) {
   intentMap.set('shieldNoTime', handleReadShieldNo);
   intentMap.set('confirmBooking1', handleInsertBooking1);
   intentMap.set('confirmBooking2', handleInsertBooking2);
+  intentMap.set('deleteConfirm', handleDeleteBooking);
 
 
   agent.handleRequest(intentMap);
