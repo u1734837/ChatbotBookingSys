@@ -195,7 +195,7 @@ app.post('/', function (request, response) {
   //update appointment table
   function updateAppointment(connection, data){
     return new Promise((resolve, reject) => {
-      connection.query(`UPDATE appointment SET taken = taken + 1 WHERE time LIKE ?`, data, (error, results, fields) => {
+      connection.query(`UPDATE appointment SET taken = taken + 1 WHERE time LIKE + ?`, data, (error, results, fields) => {
         resolve(results);
       });
     });
