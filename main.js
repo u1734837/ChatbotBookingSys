@@ -47,9 +47,21 @@ app.post('/', function (request, response) {
         });
     });
   }
+
+  const text = (time) => {
+    return ({"text": time})
+  };
+
+  function getTime(result){
+    return result.map(res => text(res.time))
+  }
+
+
     //Pulling data from the shielded DB query and displaying in the chatbot agent
   function handleReadShieldYes(agent){
     console.log("handleShieldYes has started")
+
+
 
     return connectToDatabase()
     .then(connection => {
@@ -65,14 +77,7 @@ app.post('/', function (request, response) {
                   },
                   {
                     "type": "chips",
-                    "options": [
-                      {
-                        "text": `${result[0].time}`,
-                      },
-                      {
-                        "text": `${result[1].time}`,
-                      }
-                    ]
+                    "options": getTime(result)
                   }
                 ]
               ]
@@ -83,6 +88,15 @@ app.post('/', function (request, response) {
         .catch(error => console.log("error", error))
     });
   }
+
+  const text2 = (time) => {
+    return ({"text": time})
+  };
+
+  function getTime2(result){
+    return result.map(res => text2(res.time))
+  }
+
   //Querying DB for non shield times
   function queryShieldNo(connection){
     return new Promise((resolve, reject) => {
@@ -112,14 +126,7 @@ app.post('/', function (request, response) {
                 },
                 {
                   "type": "chips",
-                  "options": [
-                    {
-                      "text": `${result[0].time}`,
-                    },
-                    {
-                      "text": `${result[1].time}`,
-                    }
-                  ]
+                  "options": getTime2(result)
                 }
               ]
             ]
