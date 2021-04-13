@@ -201,8 +201,7 @@ app.post('/', function (request, response) {
       });
     });
   }
-  //update appointment table shielded
-    //update appointment table
+  //update appointment table shielded +1
     function updateAppointment1(connection, data){
       return new Promise((resolve, reject) => {
         connection.query(`UPDATE appointment SET taken = taken + 1 WHERE time LIKE + ?`, data, (error, results, fields) => {
@@ -210,7 +209,7 @@ app.post('/', function (request, response) {
         });
       });
     }
-  //update appointment table non shielded
+  //update appointment table non shielded +1
   function updateAppointment2(connection, data){
     return new Promise((resolve, reject) => {
       connection.query(`UPDATE appointment SET taken = taken + 1 WHERE time LIKE + ?`, data, (error, results, fields) => {
@@ -218,8 +217,16 @@ app.post('/', function (request, response) {
       });
     });
   }
-
-
+/*
+  //update appointment table shielded -1
+  function updateAppointment3(connection, data){
+    return new Promise((resolve, reject) => {
+      connection.query(`UPDATE appointment SET taken = taken - 1 WHERE time LIKE + ?`, data, (error, results, fields) => {
+        resolve(results);
+      });
+    });
+  }
+*/
 
 
   let intentMap = new Map();

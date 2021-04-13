@@ -201,7 +201,7 @@ app.post('/', function (request, response) {
       });
     });
   }
-  //update appointment table shielded
+  //update appointment table shielded +1
     //update appointment table
     function updateAppointment1(connection, data){
       return new Promise((resolve, reject) => {
